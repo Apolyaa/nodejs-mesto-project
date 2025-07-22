@@ -2,9 +2,9 @@ import { z } from 'zod';
 
 export const userSchema = z.object({
   body: z.object({
-    name: z.string().min(2).max(30),
-    about: z.string().min(2).max(200),
-    avatar: z.string().url(),
+    name: z.string().min(2).max(30).optional(),
+    about: z.string().min(2).max(200).optional(),
+    avatar: z.string().url().optional(),
     email: z.string().email(),
     password: z.string().min(8),
   }),

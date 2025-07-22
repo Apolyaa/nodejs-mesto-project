@@ -6,6 +6,7 @@ const STATUS_CODE = {
   unauthorized: 401,
   conflict: 409,
   forbidden: 403,
+  created: 201,
 };
 
 export default STATUS_CODE;

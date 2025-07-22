@@ -5,6 +5,8 @@ import ERROR_MESSAGES from '../utils/consts/errorMessages';
 import getCookie from '../utils/getCookie';
 import STATUS_CODE from '../utils/consts/statusCodes';
 
+const { JWT_SECRET = '' } = process.env;
+
 export default (req: Request, _: Response, next: NextFunction) => {
   const jwtValue = getCookie('jwt', req.headers.cookie);
   console.log(jwtValue);
@@ -19,7 +21,7 @@ export default (req: Request, _: Response, next: NextFunction) => {
   let payload;
 
   try {
-    payload = jwt.verify(jwtValue, 'secret');
+    payload = jwt.verify(jwtValue, JWT_SECRET);
   } catch (err) {
     next(new ResponseError({
       message: ERROR_MESSAGES.invalidToken,

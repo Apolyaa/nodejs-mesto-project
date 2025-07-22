@@ -7,6 +7,8 @@ import ERROR_MESSAGES from '../utils/consts/errorMessages';
 import STATUS_CODE from '../utils/consts/statusCodes';
 import getIsMongoError from '../utils/getIsMongoError';
 
+const { JWT_SECRET = '' } = process.env;
+
 export const getUsers = async (
   _: Request,
   res: Response,
@@ -41,7 +43,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 
     const { password: _, ...userWithoutPassword } = user.toObject();
 
-    res.send(userWithoutPassword);
+    res.status(STATUS_CODE.created).send(userWithoutPassword);
   } catch (error) {
     if (getIsMongoError(error) && error.code === 11000) {
       next(new ResponseError({
@@ -162,7 +164,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     const token = jwt.sign(
       { _id: user._id },
-      'secret',
+      JWT_SECRET,
       { expiresIn: ('7d' as SignOptions['expiresIn']) },
     );
 

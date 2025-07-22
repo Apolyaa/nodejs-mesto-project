@@ -17,7 +17,7 @@ export const createCard = async (req: Request, res: Response, next: NextFunction
   const { name, link } = req.body;
   try {
     const card = await Card.create({ name, link, owner: req.user._id });
-    res.send(card);
+    res.status(STATUS_CODE.created).send(card);
   } catch {
     next(ResponseError.getInternalError());
   }
