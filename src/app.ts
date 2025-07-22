@@ -1,27 +1,39 @@
-import express, {Request, Response, NextFunction} from 'express';
+import express from 'express';
 import mongoose from 'mongoose';
 import userRouter from './routes/user';
 import cardRouter from './routes/cards';
 import catchErrors from './middlewares/catchErrors';
+import auth from './middlewares/auth';
+import { createUser, login } from './controllers/user';
+import ResponseError from './utils/responseError';
+import ERROR_MESSAGES from './utils/consts/errorMessages';
+import STATUS_CODE from './utils/consts/statusCodes';
+import { errorLogger, requestLogger } from './middlewares/logger';
+import { loginSchema, userSchema } from './validation/user';
+import { validateRequest } from './validation/validateRequest';
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-  req.user = {
-    _id: '6869197097bf7a3fa11a4fed'
-  };
-  
-  next();
+app.use(requestLogger);
+
+app.use(express.json());
+app.post('/signin', validateRequest(loginSchema), login);
+app.post('/signup', validateRequest(userSchema), createUser);
+app.use(auth, userRouter);
+app.use(auth, cardRouter);
+
+app.all('*', (req, res, next) => {
+  next(new ResponseError({
+    message: ERROR_MESSAGES.notFound,
+    status: STATUS_CODE.notFound,
+  }));
 });
 
-app.use('/users', userRouter);
-app.use('/cards', cardRouter);
-
+app.use(errorLogger);
 app.use(catchErrors);
 
 app.listen(3000, () => {
-    console.log(`App listening on port ${3000}`)
-})
+  console.log(`App listening on port ${3000}`);
+});

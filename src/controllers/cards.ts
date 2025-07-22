@@ -4,14 +4,14 @@ import ResponseError from '../utils/responseError';
 import STATUS_CODE from '../utils/consts/statusCodes';
 import ERROR_MESSAGES from '../utils/consts/errorMessages';
 
-export const getCards = async function(_: Request, res: Response, next: NextFunction) {
-    try {
+export const getCards = async (_: Request, res: Response, next: NextFunction) => {
+  try {
     const cards = await Card.find({});
     res.send(cards);
   } catch {
     next(ResponseError.getInternalError());
   }
-}
+};
 
 export const createCard = async (req: Request, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
@@ -21,10 +21,10 @@ export const createCard = async (req: Request, res: Response, next: NextFunction
   } catch {
     next(ResponseError.getInternalError());
   }
-}
+};
 
 export const deleteCard = async (req: Request, res: Response, next: NextFunction) => {
-    try {
+  try {
     const card = await Card.findById(req.params.cardId);
 
     if (!card) {
@@ -34,13 +34,24 @@ export const deleteCard = async (req: Request, res: Response, next: NextFunction
       }));
       return;
     }
+
+    if (String(card.owner) !== req.user._id) {
+      next(new ResponseError({
+        message: ERROR_MESSAGES.forbiddenDelete,
+        status: STATUS_CODE.forbidden,
+      }));
+      return;
+    }
+
     const saved = card.toObject();
+
     await card.deleteOne();
+
     res.send(saved);
   } catch (err) {
     next(ResponseError.getInternalError());
   }
-}
+};
 
 export const likeCard = async (req: Request, res: Response, next: NextFunction) => {
   try {
